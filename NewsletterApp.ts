@@ -5,7 +5,7 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
-import { GenerateCommand } from './commands/GenerateCommand';
+import { NewsletterCommand } from './commands/GenerateCommand';
 
 export class NewsletterApp extends App {
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -16,7 +16,7 @@ export class NewsletterApp extends App {
 		configuration: IConfigurationExtend
 	): Promise<void> {
 		await configuration.slashCommands.provideSlashCommand(
-			new GenerateCommand(this)
+			new NewsletterCommand(this)
 		);
 	}
 }
