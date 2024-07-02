@@ -13,40 +13,45 @@ export async function createTextCompletion(
 	prompt: string,
 	threadId?: string
 ): Promise<string> {
-	const model = await app
-		.getAccessors()
-		.environmentReader.getSettings()
-		.getValueById('model');
-	const url = `http://${model}/v1`;
+	try {
+		const model = await app
+			.getAccessors()
+			.environmentReader.getSettings()
+			.getValueById('model');
+		const url = `http://${model}/v1`;
 
-	const body = {
-		model,
-		messages: [
-			{
-				role: 'system',
-				content: prompt,
+		const body = {
+			model,
+			messages: [
+				{
+					role: 'system',
+					content: prompt,
+				},
+			],
+			temperature: 0,
+		};
+
+		const response = await http.post(url + '/chat/completions', {
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		],
-		temperature: 0,
-	};
+			content: JSON.stringify(body),
+		});
 
-	const response = await http.post(url + '/chat/completions', {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		content: JSON.stringify(body),
-	});
+		if (!response.content) {
+			await notifyMessage(
+				room,
+				read,
+				user,
+				'Something is wrong with AI. Please try again later',
+				threadId
+			);
+			throw new Error('Something is wrong with AI. Please try again later');
+		}
 
-	if (!response.content) {
-		await notifyMessage(
-			room,
-			read,
-			user,
-			'Something is wrong with AI. Please try again later',
-			threadId
-		);
-		throw new Error('Something is wrong with AI. Please try again later');
+		return JSON.parse(response.content).choices[0].message.content;
+	} catch (error) {
+		await notifyMessage(room, read, user, `Error: ${error.message}`, threadId);
+		throw error;
 	}
-
-	return JSON.parse(response.content).choices[0].message.content;
 }
