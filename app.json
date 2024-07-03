@@ -1,48 +1,48 @@
 {
     "id": "948e2eae-ae59-4c5f-b802-b86cd7e34f2d",
-	"version": "0.0.1",
-	"requiredApiVersion": "^1.19.0",
-	"author": {
-		"name": "YurikoKikuchi",
-		"homepage": "https://github.com/yurikomium",
-		"support": "https://github.com/yurikomium"
-	},
-	"name": "NewsletterApp",
-	"nameSlug": "newsletterapp",
-	"classFile": "NewsletterApp.ts",
-	"description": "An AI assistant that generate Newsletter in Rocket.chat",
-	"implements": [],
-	"permissions": [
-		{
-			"name": "user.read"
-		},
-		{
-			"name": "user.write"
-		},
-		{
-			"name": "room.read"
-		},
-		{
-			"name": "room.write"
-		},
-		{
-			"name": "message.read"
-		},
-		{
-			"name": "message.write"
-		},
-		{
-			"name": "slashcommand"
-		},
-		{
-			"name": "api"
-		},
-		{
-			"name": "networking"
-		},
-		{
-			"name": "threads.read"
-		}
-	]
+    "version": "0.0.1",
+    "requiredApiVersion": "^1.19.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "YurikoKikuchi",
+        "homepage": "https://github.com/yurikomium",
+        "support": "https://github.com/yurikomium"
+    },
+    "name": "NewsletterApp",
+    "nameSlug": "newsletterapp",
+    "classFile": "NewsletterApp.ts",
+    "description": "An AI assistant that generate Newsletter in Rocket.chat",
+    "implements": [],
+    "permissions": [
+        {
+            "name": "user.read"
+        },
+        {
+            "name": "user.write"
+        },
+        {
+            "name": "room.read"
+        },
+        {
+            "name": "room.write"
+        },
+        {
+            "name": "message.read"
+        },
+        {
+            "name": "message.write"
+        },
+        {
+            "name": "slashcommand"
+        },
+        {
+            "name": "api"
+        },
+        {
+            "name": "networking"
+        },
+        {
+            "name": "threads.read"
+        }
+    ]
 }
-
