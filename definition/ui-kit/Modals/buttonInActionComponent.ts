@@ -1,5 +1,5 @@
 import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
-import { NewsletterApp } from '../../../NewsletterApp';
+import { INewsletterApp } from '../../../NewsletterApp';
 import { ElementInteractionParam } from '../../../definition/ui-kit/Element/IElementBuilder';
 import { ActionsBlock } from '@rocket.chat/ui-kit';
 
@@ -11,7 +11,7 @@ export function ButtonInActionComponent(
 		value,
 		url,
 	}: {
-		app: NewsletterApp;
+		app: INewsletterApp;
 		buttonText: string;
 		style?: ButtonStyle;
 		value?: string;
