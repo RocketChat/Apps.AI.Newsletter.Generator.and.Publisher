@@ -1,5 +1,5 @@
 import { InputBlock, InputElementDispatchAction } from '@rocket.chat/ui-kit';
-import { NewsletterApp } from '../../../../NewsletterApp';
+import { INewsletterApp } from '../../../../NewsletterApp';
 import { ElementInteractionParam } from '../../Element/IElementBuilder';
 import { Modals } from '../../../../enum/Modals';
 export function inputElementComponent(
@@ -14,7 +14,7 @@ export function inputElementComponent(
 		initialValue,
 		dispatchActionConfigOnInput,
 	}: {
-		app: NewsletterApp;
+		app: INewsletterApp;
 		placeholder: string;
 		label: string;
 		optional?: boolean;

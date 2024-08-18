@@ -21,7 +21,7 @@ import {
 	SectionBlock,
 } from '@rocket.chat/ui-kit';
 import { IUIKitContextualBarViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
-import { NewsletterApp } from '../../../NewsletterApp';
+import { INewsletterApp } from '../../../NewsletterApp';
 import { ButtonInActionComponent } from './buttonInActionComponent';
 import { ButtonInSectionComponent } from './buttonInSectionComponent';
 import { selectLanguageComponent } from './selectLanguageComponent';
@@ -34,7 +34,7 @@ import {
 } from '@rocket.chat/apps-engine/definition/metadata';
 
 export async function createMainContextualBar(
-	app: NewsletterApp,
+	app: INewsletterApp,
 	user: IUser,
 	read: IRead,
 	persistence: IPersistence,
