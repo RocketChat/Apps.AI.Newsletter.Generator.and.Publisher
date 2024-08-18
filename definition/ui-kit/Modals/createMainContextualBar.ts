@@ -19,6 +19,8 @@ import {
 	TextObjectType,
 	ContextBlock,
 	SectionBlock,
+	LayoutBlock,
+	ActionsBlock,
 } from '@rocket.chat/ui-kit';
 import { IUIKitContextualBarViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { INewsletterApp } from '../../../NewsletterApp';
@@ -44,7 +46,8 @@ export async function createMainContextualBar(
 	showGen?: boolean
 ): Promise<IUIKitSurfaceViewParam | Error> {
 	const { elementBuilder, blockBuilder } = app.getUtils();
-	const blocks: Block[] = [];
+	const blocks: (LayoutBlock | ContextBlock | SectionBlock | ActionsBlock)[] =
+		[];
 
 	try {
 		const association = new RocketChatAssociationRecord(
