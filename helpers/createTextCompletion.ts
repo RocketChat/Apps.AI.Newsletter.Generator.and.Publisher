@@ -2,10 +2,9 @@ import { IHttp, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { notifyMessage } from './notifyMessage';
-import { App } from '@rocket.chat/apps-engine/definition/App';
+import { AppSettings } from '../types/Const';
 
 export async function createTextCompletion(
-	app: App,
 	room: IRoom,
 	read: IRead,
 	user: IUser,
@@ -14,10 +13,11 @@ export async function createTextCompletion(
 	threadId?: string
 ): Promise<string> {
 	try {
-		const model = await app
-			.getAccessors()
-			.environmentReader.getSettings()
-			.getValueById('model');
+		const model = await read
+			.getEnvironmentReader()
+			.getSettings()
+			.getValueById(AppSettings.MODEL_SELECTION);
+
 		const url = `http://${model}/v1`;
 
 		const body = {

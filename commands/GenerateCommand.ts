@@ -10,7 +10,6 @@ import {
 import { notifyMessage } from '../helpers/notifyMessage';
 import { createTextCompletion } from '../helpers/createTextCompletion';
 import { createNewsletterPrompt } from '../constants/prompts';
-import { App } from '@rocket.chat/apps-engine/definition/App';
 import { NewsletterInput, NewsletterStyle } from '../types/NewsletterInput';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
@@ -21,11 +20,6 @@ export class NewsletterCommand implements ISlashCommand {
 		'Generate a newsletter: /newsletter generate product_name: "Product Name" | new_features: "Feature 1, Feature 2" | benefits: "Benefit 1, Benefit 2" | faq: "Question 1?, Question 2?" | additional_info: "Info" | team_name: "Team Name" | style: "free-form paragraphs"';
 	public i18nDescription = 'Newsletter commands: generate, subscribe, help';
 	public providesPreview = false;
-	private readonly app: App;
-
-	constructor(app: App) {
-		this.app = app;
-	}
 
 	public async executor(
 		context: SlashCommandContext,
@@ -86,7 +80,6 @@ export class NewsletterCommand implements ISlashCommand {
 
 			const prompt = createNewsletterPrompt(newsletterInput);
 			const newsletter = await createTextCompletion(
-				this.app,
 				room,
 				read,
 				user,

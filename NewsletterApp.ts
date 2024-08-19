@@ -18,9 +18,7 @@ export class NewsletterApp extends App {
 			...settings.map((setting) =>
 				configuration.settings.provideSetting(setting)
 			),
-			configuration.slashCommands.provideSlashCommand(
-				new NewsletterCommand(this)
-			),
+			configuration.slashCommands.provideSlashCommand(new NewsletterCommand()),
 		]);
 	}
 }
