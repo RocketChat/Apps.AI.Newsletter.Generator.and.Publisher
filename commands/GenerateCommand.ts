@@ -10,7 +10,6 @@ import {
 import { notifyMessage } from '../helpers/notifyMessage';
 import { createTextCompletion } from '../helpers/createTextCompletion';
 import { createNewsletterPrompt } from '../constants/prompts';
-import { App } from '@rocket.chat/apps-engine/definition/App';
 import { NewsletterInput, NewsletterStyle } from '../types/NewsletterInput';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
@@ -65,16 +64,18 @@ export class NewsletterCommand implements ISlashCommand {
 			const newsletterInput: NewsletterInput = this.parseUserInput(userInput);
 
 			const prompt = createNewsletterPrompt(newsletterInput);
-			const newsletter = await createTextCompletion(
-				this.app,
-				room,
-				read,
-				user,
-				http,
-				prompt
-			);
-
-			await notifyMessage(room, read, user, newsletter);
+			createTextCompletion(room, read, user, http, prompt)
+				.then((newsletter) => {
+					notifyMessage(room, read, user, newsletter);
+				})
+				.catch((error) => {
+					notifyMessage(
+						room,
+						read,
+						user,
+						`Failed to generate newsletter: ${error.message}`
+					);
+				});
 		} catch (error) {
 			await notifyMessage(
 				room,

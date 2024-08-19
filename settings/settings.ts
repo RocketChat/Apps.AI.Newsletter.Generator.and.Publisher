@@ -2,10 +2,11 @@ import {
 	ISetting,
 	SettingType,
 } from '@rocket.chat/apps-engine/definition/settings';
+import { AppSettings } from '../types/Const';
 
 export const settings: ISetting[] = [
 	{
-		id: 'model',
+		id: AppSettings.MODEL_SELECTION,
 		i18nLabel: 'Model selection',
 		i18nDescription: 'AI model to use for summarization.',
 		type: SettingType.SELECT,
@@ -19,7 +20,7 @@ export const settings: ISetting[] = [
 		packageValue: 'llama3-gradient-8b',
 	},
 	{
-		id: 'add-ons',
+		id: AppSettings.SUMMARY_ADDONS,
 		i18nLabel: 'Summary add-ons',
 		i18nDescription: 'Additional features to enable for the summary command',
 		type: SettingType.MULTI_SELECT,
