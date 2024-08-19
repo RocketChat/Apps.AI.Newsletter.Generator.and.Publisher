@@ -79,15 +79,18 @@ export class NewsletterCommand implements ISlashCommand {
 			const newsletterInput: NewsletterInput = this.parseUserInput(userInput);
 
 			const prompt = createNewsletterPrompt(newsletterInput);
-			const newsletter = await createTextCompletion(
-				room,
-				read,
-				user,
-				http,
-				prompt
-			);
-
-			await notifyMessage(room, read, user, newsletter);
+			createTextCompletion(room, read, user, http, prompt)
+				.then((newsletter) => {
+					notifyMessage(room, read, user, newsletter);
+				})
+				.catch((error) => {
+					notifyMessage(
+						room,
+						read,
+						user,
+						`Failed to generate newsletter: ${error.message}`
+					);
+				});
 		} catch (error) {
 			await notifyMessage(
 				room,
