@@ -105,9 +105,7 @@ export class ExecuteBlockActionHandler {
 						this.read,
 						this.persistence,
 						this.modify,
-						room,
-						undefined,
-						true
+						room
 					);
 					if (contextualBar instanceof Error) {
 						this.app.getLogger().error(contextualBar.message);
