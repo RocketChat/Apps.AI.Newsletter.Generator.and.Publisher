@@ -2,6 +2,7 @@ import {
 	IHttp,
 	IModify,
 	IRead,
+	IPersistence,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import {
 	ISlashCommand,
@@ -13,6 +14,8 @@ import { createNewsletterPrompt } from '../constants/prompts';
 import { NewsletterInput, NewsletterStyle } from '../types/NewsletterInput';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { createMainContextualBar } from '../definition/ui-kit/Modals/createMainContextualBar';
+import { INewsletterApp } from '../NewsletterApp';
 
 export class NewsletterCommand implements ISlashCommand {
 	public command = 'newsletter';
@@ -20,12 +23,18 @@ export class NewsletterCommand implements ISlashCommand {
 		'Generate a newsletter: /newsletter generate product_name: "Product Name" | new_features: "Feature 1, Feature 2" | benefits: "Benefit 1, Benefit 2" | faq: "Question 1?, Question 2?" | additional_info: "Info" | team_name: "Team Name" | style: "free-form paragraphs"';
 	public i18nDescription = 'Newsletter commands: generate, subscribe, help';
 	public providesPreview = false;
+	private readonly app: INewsletterApp;
+
+	constructor(app: INewsletterApp) {
+		this.app = app;
+	}
 
 	public async executor(
 		context: SlashCommandContext,
 		read: IRead,
 		modify: IModify,
-		http: IHttp
+		http: IHttp,
+		persistence: IPersistence
 	): Promise<void> {
 		const user = context.getSender();
 		const room = context.getRoom();
@@ -33,17 +42,19 @@ export class NewsletterCommand implements ISlashCommand {
 
 		switch (subcommand) {
 			case 'generate':
-				await this.handleGenerate(rest.join(' '), room, read, user, http);
+				const userInput = rest.join(' ');
+				const newsletterInput = this.parseUserInput(userInput);
+				await this.processNewsletter(newsletterInput, room, read, user, http);
 				break;
-			case 'subscribe':
-				await notifyMessage(room, read, user, 'Stay tuned!');
+			case 'product':
+				await this.showContextualBar(room, read, modify, persistence, user);
 				break;
 			case 'help':
 				await notifyMessage(
 					room,
 					read,
 					user,
-					'Usage: /newsletter generate ... | /newsletter subscribe ...'
+					'Usage:\n/newsletter generate ... - Generate a newsletter using command line\n/newsletter product - Open Product Release UI\n/newsletter help - Show this help message'
 				);
 				break;
 			default:
@@ -56,41 +67,24 @@ export class NewsletterCommand implements ISlashCommand {
 		}
 	}
 
-	private async handleGenerate(
-		userInput: string,
+	private async processNewsletter(
+		newsletterInput: NewsletterInput,
 		room: IRoom,
 		read: IRead,
 		user: IUser,
 		http: IHttp
 	): Promise<void> {
-		if (!userInput) {
-			await notifyMessage(
+		await notifyMessage(room, read, user, 'Generating your newsletter...');
+		try {
+			const prompt = createNewsletterPrompt(newsletterInput);
+			const newsletter = await createTextCompletion(
 				room,
 				read,
 				user,
-				'Please provide content for the newsletter. Usage: /newsletter generate product_name: "Product Name" | new_features: "Feature 1, Feature 2" | ...'
+				http,
+				prompt
 			);
-			return;
-		}
-
-		await notifyMessage(room, read, user, 'Generating your newsletter...');
-
-		try {
-			const newsletterInput: NewsletterInput = this.parseUserInput(userInput);
-
-			const prompt = createNewsletterPrompt(newsletterInput);
-			createTextCompletion(room, read, user, http, prompt)
-				.then((newsletter) => {
-					notifyMessage(room, read, user, newsletter);
-				})
-				.catch((error) => {
-					notifyMessage(
-						room,
-						read,
-						user,
-						`Failed to generate newsletter: ${error.message}`
-					);
-				});
+			await notifyMessage(room, read, user, newsletter);
 		} catch (error) {
 			await notifyMessage(
 				room,
@@ -101,10 +95,51 @@ export class NewsletterCommand implements ISlashCommand {
 		}
 	}
 
+	private async showContextualBar(
+		room: IRoom,
+		read: IRead,
+		modify: IModify,
+		persistence: IPersistence,
+		user: IUser
+	): Promise<void> {
+		try {
+			const contextualBarView = await createMainContextualBar(
+				this.app,
+				user,
+				read,
+				persistence,
+				modify,
+				room
+			);
+
+			if (contextualBarView instanceof Error) {
+				await notifyMessage(
+					room,
+					read,
+					user,
+					`Failed to create contextual bar: ${contextualBarView.message}`
+				);
+				return;
+			}
+
+			const triggerId = `contextual_bar_${room.id}_${Date.now()}`;
+
+			await modify
+				.getUiController()
+				.openSurfaceView(contextualBarView, { triggerId }, user);
+		} catch (error) {
+			await notifyMessage(
+				room,
+				read,
+				user,
+				`An unexpected error occurred: ${error.message}`
+			);
+		}
+	}
+
 	private parseUserInput(userInput: string): NewsletterInput {
 		const parts = userInput.split('|').map((part) => part.trim());
 		const input: Partial<NewsletterInput> = {};
-
 		for (const part of parts) {
 			const [key, value] = part.split(':').map((item) => item.trim());
 			if (key && value) {
@@ -115,7 +150,6 @@ export class NewsletterCommand implements ISlashCommand {
 				}
 			}
 		}
-
 		return {
 			product_name: input.product_name || 'Default Product',
 			new_features: input.new_features || '',
@@ -128,9 +162,8 @@ export class NewsletterCommand implements ISlashCommand {
 	}
 
 	private parseStyle(style: string): NewsletterStyle {
-		if (style.toLowerCase() === 'maintaining structure') {
-			return NewsletterStyle.MaintainingStructure;
-		}
-		return NewsletterStyle.FreeFormParagraphs;
+		return style.toLowerCase() === 'maintaining structure'
+			? NewsletterStyle.MaintainingStructure
+			: NewsletterStyle.FreeFormParagraphs;
 	}
 }
