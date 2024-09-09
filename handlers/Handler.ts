@@ -16,6 +16,8 @@ import { generateCode } from '../helpers/generateCode';
 import { sendNotification, sendMessage } from '../helpers/message';
 import { regenerationComponent } from '../definition/ui-kit/Modals/regenerationComponent';
 import { shareComponent } from '../definition/ui-kit/Modals/shareComponent';
+import { Block, LayoutBlock } from '@rocket.chat/ui-kit';
+import { IBlock } from '@rocket.chat/apps-engine/definition/uikit';
 
 export class Handler {
 	public app: NewsletterApp;
@@ -266,7 +268,7 @@ export class Handler {
 			this.sender,
 			this.room,
 			undefined,
-			regen_block
+			regen_block as (LayoutBlock | IBlock)[]
 		);
 		await sendNotification(
 			this.read,
@@ -274,7 +276,7 @@ export class Handler {
 			this.sender,
 			this.room,
 			undefined,
-			share_block
+			share_block as (LayoutBlock | IBlock)[]
 		);
 	}
 	private extractCodeBlockContent(text: string): string | null {
