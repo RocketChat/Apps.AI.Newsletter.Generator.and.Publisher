@@ -26,7 +26,6 @@ import { IUIKitContextualBarViewParam } from '@rocket.chat/apps-engine/definitio
 import { INewsletterApp } from '../../../NewsletterApp';
 import { ButtonInActionComponent } from './buttonInActionComponent';
 import { ButtonInSectionComponent } from './buttonInSectionComponent';
-import { selectLanguageComponent } from './selectLanguageComponent';
 import { selectLLMComponent } from './selectLLMComponent';
 import { Modals } from '../../../enum/Modals';
 import { inputElementComponent } from './common/inputElementComponent';
@@ -42,112 +41,198 @@ export async function createMainContextualBar(
 	persistence: IPersistence,
 	modify: IModify,
 	room: IRoom,
-	viewId?: string,
-	showGen?: boolean
+	viewId?: string
 ): Promise<IUIKitSurfaceViewParam | Error> {
 	const { elementBuilder, blockBuilder } = app.getUtils();
 	const blocks: (LayoutBlock | ContextBlock | SectionBlock | ActionsBlock)[] =
 		[];
 
 	try {
-		const association = new RocketChatAssociationRecord(
-			RocketChatAssociationModel.USER,
-			`${user.id}#RoomId`
+		// Product Name
+		blocks.push(
+			inputElementComponent(
+				{
+					app,
+					placeholder: 'Enter product name',
+					label: 'Product Name',
+					optional: false,
+					multiline: false,
+					dispatchActionConfigOnInput: true,
+					initialValue: '',
+				},
+				{
+					actionId: 'product_name_input',
+					blockId: 'product_name_block',
+				}
+			)
 		);
-		await persistence.updateByAssociation(
-			association,
-			{ roomId: room.id },
-			true
+
+		// New Features
+		blocks.push(
+			inputElementComponent(
+				{
+					app,
+					placeholder: 'Enter new features',
+					label: 'New Features',
+					optional: false,
+					multiline: true,
+					dispatchActionConfigOnInput: true,
+					initialValue: '',
+				},
+				{
+					actionId: 'new_features_input',
+					blockId: 'new_features_block',
+				}
+			)
 		);
-		console.log('maincontext(): room ->' + room.id);
-		const LanguageComponent = await selectLanguageComponent(
-			app,
-			user,
-			read,
-			persistence,
-			modify,
-			room
+
+		// Benefits
+		blocks.push(
+			inputElementComponent(
+				{
+					app,
+					placeholder: 'Enter benefits',
+					label: 'Benefits',
+					optional: false,
+					multiline: true,
+					dispatchActionConfigOnInput: true,
+					initialValue: '',
+				},
+				{
+					actionId: 'benefits_input',
+					blockId: 'benefits_block',
+				}
+			)
 		);
-		const LLMComponent = await selectLLMComponent(
-			app,
-			user,
-			read,
-			persistence,
-			modify,
-			room
+
+		// FAQ (Optional)
+		blocks.push(
+			inputElementComponent(
+				{
+					app,
+					placeholder: 'Enter FAQ (optional)',
+					label: 'FAQ',
+					optional: true,
+					multiline: true,
+					dispatchActionConfigOnInput: true,
+					initialValue: '',
+				},
+				{
+					actionId: 'faq_input',
+					blockId: 'faq_block',
+				}
+			)
 		);
-		const divider = blockBuilder.createDividerBlock();
-		const startButton = ButtonInSectionComponent(
-			{
-				app,
-				buttonText: 'Configure',
-				style: ButtonStyle.PRIMARY,
-			},
-			{
-				actionId: Modals.CONFIGURE_ACTION,
-				blockId: Modals.CONFIGURE_BLOCK,
-			}
+
+		// Additional Info (Optional)
+		blocks.push(
+			inputElementComponent(
+				{
+					app,
+					placeholder: 'Enter additional info (optional)',
+					label: 'Additional Information',
+					optional: true,
+					multiline: true,
+					dispatchActionConfigOnInput: true,
+					initialValue: '',
+				},
+				{
+					actionId: 'additional_info_input',
+					blockId: 'additional_info_block',
+				}
+			)
 		);
-		const generateButton = ButtonInSectionComponent(
-			{
-				app,
-				buttonText: 'Start to Generate Code',
-				style: ButtonStyle.PRIMARY,
-			},
-			{
-				actionId: Modals.GEN_BUTTON_ACTION,
-				blockId: Modals.GEN_BUTTON_BLOCK,
-			}
+
+		// Team Name
+		blocks.push(
+			inputElementComponent(
+				{
+					app,
+					placeholder: 'Enter team name',
+					label: 'Team Name',
+					optional: false,
+					multiline: false,
+					dispatchActionConfigOnInput: true,
+					initialValue: '',
+				},
+				{
+					actionId: 'team_name_input',
+					blockId: 'team_name_block',
+				}
+			)
 		);
-		const configureText: SectionBlock = {
-			type: 'section',
-			text: blockBuilder.createTextObjects([
-				`Your have set valid configuration, you can now generate code:`,
-			])[0],
-		};
-		const generateInput = inputElementComponent(
+
+		// Style Dropdown
+		const styleSelect = this.getUtils().elementBuilder.buildStaticSelectElement(
 			{
-				app,
-				placeholder: 'Please help me generate a binary search tree ...',
-				label: 'Write the description for the code you want to generate:',
-				optional: false,
-				multiline: true,
-				dispatchActionConfigOnInput: true,
-				initialValue: '',
-			},
-			{
-				actionId: Modals.GEN_INPUT_ACTION,
-				blockId: Modals.GEN_INPUT_BLOCK,
+				placeholder: {
+					type: TextObjectType.PLAINTEXT,
+					text: 'Select an item',
+				},
+				options: [
+					{
+						text: {
+							type: TextObjectType.PLAINTEXT,
+							text: 'Maintaining Structure',
+						},
+						value: 'maintaining structure',
+					},
+					{
+						text: {
+							type: TextObjectType.PLAINTEXT,
+							text: 'Free-form Paragraphs',
+						},
+						value: 'free-form paragraphs',
+					},
+				],
+				actionId: 'style_select',
 			}
 		);
 
-		blocks.push(LanguageComponent);
-		blocks.push(LLMComponent);
-		blocks.push(startButton);
-		blocks.push(divider);
-		if (showGen) {
-			blocks.push(configureText);
-			blocks.push(generateButton);
-		}
+		const sectionBlock: SectionBlock = {
+			type: 'section',
+			text: {
+				type: TextObjectType.MRKDWN,
+				text: 'Select Style',
+			},
+			accessory: styleSelect,
+		};
+
+		blocks.push(sectionBlock);
+
+		// Generate Button
+		blocks.push(
+			ButtonInSectionComponent(
+				{
+					app,
+					buttonText: 'Generate Newsletter',
+					style: ButtonStyle.PRIMARY,
+				},
+				{
+					actionId: 'generate_newsletter_action',
+					blockId: 'generate_newsletter_block',
+				}
+			)
+		);
 	} catch (err) {
 		console.log('Error in maincontext: ' + err);
 		app.getLogger().error(err);
 	}
 
 	const close = elementBuilder.addButton(
-		{ text: 'close', style: ButtonStyle.DANGER },
+		{ text: 'Close', style: ButtonStyle.DANGER },
 		{
-			actionId: Modals.MAIN_CLOSE_ACTION,
-			blockId: Modals.MAIN_CLOSE_BLOCK,
+			actionId: 'main_close_action',
+			blockId: 'main_close_block',
 		}
 	);
 
 	return {
-		id: viewId || 'contextualbarId',
+		id: viewId || 'newsletterContextualBarId',
 		type: UIKitSurfaceType.CONTEXTUAL_BAR,
 		title: {
 			type: TextObjectType.MRKDWN,
-			text: 'Ai Programmer',
+			text: 'Generate Newsletter',
 		},
 		blocks,
 		close,

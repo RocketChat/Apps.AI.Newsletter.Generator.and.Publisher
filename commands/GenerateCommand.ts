@@ -38,7 +38,31 @@ export class NewsletterCommand implements ISlashCommand {
 	): Promise<void> {
 		const user = context.getSender();
 		const room = context.getRoom();
-		await this.showContextualBar(room, read, modify, persistence, user);
+		const [subcommand, ...rest] = context.getArguments();
+
+		switch (subcommand) {
+			case 'generate':
+				await this.handleGenerate(rest.join(' '), room, read, user, http);
+				break;
+			case 'product':
+				await this.showContextualBar(room, read, modify, persistence, user);
+				break;
+			case 'help':
+				await notifyMessage(
+					room,
+					read,
+					user,
+					'Usage:\n/newsletter generate ... - Generate a newsletter using command line\n/newsletter product - Open Product Release UI\n/newsletter help - Show this help message'
+				);
+				break;
+			default:
+				await notifyMessage(
+					room,
+					read,
+					user,
+					'Unknown subcommand. Use /newsletter help for usage information.'
+				);
+		}
 	}
 
 	private async handleGenerate(
@@ -57,25 +81,18 @@ export class NewsletterCommand implements ISlashCommand {
 			);
 			return;
 		}
-
 		await notifyMessage(room, read, user, 'Generating your newsletter...');
-
 		try {
 			const newsletterInput: NewsletterInput = this.parseUserInput(userInput);
-
 			const prompt = createNewsletterPrompt(newsletterInput);
-			createTextCompletion(room, read, user, http, prompt)
-				.then((newsletter) => {
-					notifyMessage(room, read, user, newsletter);
-				})
-				.catch((error) => {
-					notifyMessage(
-						room,
-						read,
-						user,
-						`Failed to generate newsletter: ${error.message}`
-					);
-				});
+			const newsletter = await createTextCompletion(
+				room,
+				read,
+				user,
+				http,
+				prompt
+			);
+			await notifyMessage(room, read, user, newsletter);
 		} catch (error) {
 			await notifyMessage(
 				room,
