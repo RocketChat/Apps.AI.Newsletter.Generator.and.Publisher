@@ -19,12 +19,13 @@ import {
 	TextObjectType,
 	ContextBlock,
 	SectionBlock,
+	LayoutBlock,
+	ActionsBlock,
 } from '@rocket.chat/ui-kit';
 import { IUIKitContextualBarViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 import { NewsletterApp } from '../../../NewsletterApp';
 import { ButtonInActionComponent } from './buttonInActionComponent';
 import { ButtonInSectionComponent } from './buttonInSectionComponent';
-import { selectLanguageComponent } from './selectLanguageComponent';
 import { selectLLMComponent } from './selectLLMComponent';
 import { Modals } from '../../../enum/Modals';
 import { inputElementComponent } from './common/inputElementComponent';
@@ -44,7 +45,9 @@ export async function regenerateCodeModal(
 	viewId?: string
 ): Promise<IUIKitSurfaceViewParam | Error> {
 	const { elementBuilder, blockBuilder } = app.getUtils();
-	const blocks: Block[] = [];
+	const blocks: (LayoutBlock | ContextBlock | SectionBlock | ActionsBlock)[] =
+		[];
+
 	try {
 		const handler = new Handler({
 			app: app,

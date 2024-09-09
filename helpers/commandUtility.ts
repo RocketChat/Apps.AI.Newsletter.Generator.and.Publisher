@@ -130,8 +130,7 @@ Please use the direct name of LLM as above in the command \`/ai-programmer llm x
 						this.modify,
 						this.sender,
 						this.room,
-						undefined,
-						regen_block
+						undefined
 					);
 					break;
 				}
