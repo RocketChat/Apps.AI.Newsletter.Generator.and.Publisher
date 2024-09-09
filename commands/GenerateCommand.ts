@@ -2,6 +2,7 @@ import {
 	IHttp,
 	IModify,
 	IRead,
+	IPersistence,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import {
 	ISlashCommand,
@@ -14,7 +15,6 @@ import { NewsletterInput, NewsletterStyle } from '../types/NewsletterInput';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { createMainContextualBar } from '../definition/ui-kit/Modals/createMainContextualBar';
-import { IPersistence } from '@rocket.chat/apps-engine/definition/accessors';
 import { INewsletterApp } from '../NewsletterApp';
 
 export class NewsletterCommand implements ISlashCommand {
@@ -42,7 +42,9 @@ export class NewsletterCommand implements ISlashCommand {
 
 		switch (subcommand) {
 			case 'generate':
-				await this.handleGenerate(rest.join(' '), room, read, user, http);
+				const userInput = rest.join(' ');
+				const newsletterInput = this.parseUserInput(userInput);
+				await this.processNewsletter(newsletterInput, room, read, user, http);
 				break;
 			case 'product':
 				await this.showContextualBar(room, read, modify, persistence, user);
@@ -65,25 +67,15 @@ export class NewsletterCommand implements ISlashCommand {
 		}
 	}
 
-	private async handleGenerate(
-		userInput: string,
+	private async processNewsletter(
+		newsletterInput: NewsletterInput,
 		room: IRoom,
 		read: IRead,
 		user: IUser,
 		http: IHttp
 	): Promise<void> {
-		if (!userInput) {
-			await notifyMessage(
-				room,
-				read,
-				user,
-				'Please provide content for the newsletter. Usage: /newsletter generate product_name: "Product Name" | new_features: "Feature 1, Feature 2" | ...'
-			);
-			return;
-		}
 		await notifyMessage(room, read, user, 'Generating your newsletter...');
 		try {
-			const newsletterInput: NewsletterInput = this.parseUserInput(userInput);
 			const prompt = createNewsletterPrompt(newsletterInput);
 			const newsletter = await createTextCompletion(
 				room,
@@ -101,39 +93,6 @@ export class NewsletterCommand implements ISlashCommand {
 				`Failed to generate newsletter: ${error.message}`
 			);
 		}
-	}
-
-	private parseUserInput(userInput: string): NewsletterInput {
-		const parts = userInput.split('|').map((part) => part.trim());
-		const input: Partial<NewsletterInput> = {};
-
-		for (const part of parts) {
-			const [key, value] = part.split(':').map((item) => item.trim());
-			if (key && value) {
-				if (key === 'style') {
-					(input as any)[key] = this.parseStyle(value);
-				} else {
-					(input as any)[key] = value.replace(/^"(.*)"$/, '$1');
-				}
-			}
-		}
-
-		return {
-			product_name: input.product_name || 'Default Product',
-			new_features: input.new_features || '',
-			benefits: input.benefits || '',
-			faq: input.faq || '',
-			additional_info: input.additional_info || '',
-			team_name: input.team_name || 'Our Team',
-			style: input.style || NewsletterStyle.FreeFormParagraphs,
-		};
-	}
-
-	private parseStyle(style: string): NewsletterStyle {
-		if (style.toLowerCase() === 'maintaining structure') {
-			return NewsletterStyle.MaintainingStructure;
-		}
-		return NewsletterStyle.FreeFormParagraphs;
 	}
 
 	private async showContextualBar(
@@ -176,5 +135,35 @@ export class NewsletterCommand implements ISlashCommand {
 				`An unexpected error occurred: ${error.message}`
 			);
 		}
+	}
+
+	private parseUserInput(userInput: string): NewsletterInput {
+		const parts = userInput.split('|').map((part) => part.trim());
+		const input: Partial<NewsletterInput> = {};
+		for (const part of parts) {
+			const [key, value] = part.split(':').map((item) => item.trim());
+			if (key && value) {
+				if (key === 'style') {
+					(input as any)[key] = this.parseStyle(value);
+				} else {
+					(input as any)[key] = value.replace(/^"(.*)"$/, '$1');
+				}
+			}
+		}
+		return {
+			product_name: input.product_name || 'Default Product',
+			new_features: input.new_features || '',
+			benefits: input.benefits || '',
+			faq: input.faq || '',
+			additional_info: input.additional_info || '',
+			team_name: input.team_name || 'Our Team',
+			style: input.style || NewsletterStyle.FreeFormParagraphs,
+		};
+	}
+
+	private parseStyle(style: string): NewsletterStyle {
+		return style.toLowerCase() === 'maintaining structure'
+			? NewsletterStyle.MaintainingStructure
+			: NewsletterStyle.FreeFormParagraphs;
 	}
 }
