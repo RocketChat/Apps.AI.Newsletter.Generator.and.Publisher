@@ -4,6 +4,8 @@ This Rocket.Chat app leverages modern open source LLMs (Mistral, Llama2, Phi, an
 
 from [GSoC](https://summerofcode.withgoogle.com/programs/2024/projects/2H2oqjBC)
 
+[Final report](https://gist.github.com/yurikomium/4907045a803e739ec488a20bcb53f11f)
+
 ## Prompt engineering
 
 You can see the progress of the prompt engineering in [Wiki](https://github.com/RocketChat/Apps.AI.Newsletter.Generator.and.Publisher/wiki).
