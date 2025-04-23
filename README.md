@@ -44,8 +44,9 @@ from [GSoC](https://summerofcode.withgoogle.com/programs/2024/projects/2H2oqjBC)
     - `<username>` is your username.
     - `<password>` is your password.
 
-## :rocket: Usage :
-    The app provide slash commands that you can use to interact with it.
+## Usage 
+
+The app provide slash commands that you can use to interact with it.
 
 -   **`/newsletter generate [user's input]`**: Generate a newsletter
 -   **`/newsletter help`**: Get a list of commands related to the newsletter app
