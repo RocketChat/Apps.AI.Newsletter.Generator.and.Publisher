@@ -30,6 +30,11 @@ export class NewsletterCommand implements ISlashCommand {
 		const user = context.getSender();
 		const room = context.getRoom();
 		const [subcommand, ...rest] = context.getArguments();
+        const helperMessage =` Hey ${user.name}! I'm Newsletter Bot. Here’s how you can get started: \n
+        - Use \`/newsletter generate [user's input]\` to generate a newsletter.
+        - Use \`/newsletter help\` to get help.
+        `
+
 
 		switch (subcommand) {
 			case 'generate':
@@ -43,7 +48,7 @@ export class NewsletterCommand implements ISlashCommand {
 					room,
 					read,
 					user,
-					'Usage: /newsletter generate ... | /newsletter subscribe ...'
+					helperMessage
 				);
 				break;
 			default:
